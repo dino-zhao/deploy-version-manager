@@ -1,3 +1,5 @@
+import type OSS from 'ali-oss';
+
 declare global {
   interface Window {
     electron: {
@@ -7,8 +9,10 @@ declare global {
         on(channel: string, func: (...args: any[]) => void): void;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         once(channel: string, func: (...args: any[]) => void): void;
+        list: () => void;
       };
     };
+    ossClient: OSS;
   }
 }
 

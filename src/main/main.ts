@@ -12,8 +12,12 @@ import path from 'path';
 import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
+import OSS from 'ali-oss';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
+
+// oss有些方法只能在node端使用https://github.com/ali-sdk/ali-oss#browser-usage
+// const client = new OSS({});
 
 export default class AppUpdater {
   constructor() {
@@ -29,6 +33,17 @@ ipcMain.on('ipc-example', async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
   console.log(msgTemplate(arg));
   event.reply('ipc-example', msgTemplate('pong'));
+});
+
+ipcMain.on('client', async (event) => {
+  const list = [];
+  try {
+    // list = await client.listBuckets();
+  } catch (error) {
+    console.log(error);
+  }
+
+  event.reply('client', list);
 });
 
 if (process.env.NODE_ENV === 'production') {

@@ -5,7 +5,10 @@ render(<App />, document.getElementById('root'));
 
 // calling IPC exposed from preload script
 window.electron.ipcRenderer.once('ipc-example', (arg) => {
-  // eslint-disable-next-line no-console
   console.log(arg);
 });
 window.electron.ipcRenderer.myPing();
+window.electron.ipcRenderer.list();
+window.electron.ipcRenderer.once('client', (arg) => {
+  console.log(arg);
+});
