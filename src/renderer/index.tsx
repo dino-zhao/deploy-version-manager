@@ -1,3 +1,4 @@
+import 'normalize.css';
 import { render } from 'react-dom';
 import zhCN from 'antd/lib/locale/zh_CN';
 import { ConfigProvider } from 'antd';
