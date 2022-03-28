@@ -5,7 +5,6 @@ import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import OSS from 'ali-oss';
-import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import type { ConfigParams } from '../renderer/type';
 // oss有些方法只能在node端使用https://github.com/ali-sdk/ali-oss#browser-usage
@@ -101,9 +100,6 @@ const createWindow = async () => {
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
-
-  const menuBuilder = new MenuBuilder(mainWindow);
-  menuBuilder.buildMenu();
 
   // Open urls in the user's browser
   mainWindow.webContents.setWindowOpenHandler((edata) => {

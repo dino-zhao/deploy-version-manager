@@ -18,7 +18,7 @@ const initialValues: ConfigParams = {
   accessKeySecret: ak.accessKeySecret ?? '',
   backupBucket: 'pi-version-backup',
 };
-export default function Config() {
+export default function OssConfig() {
   const onFinish = (values: ConfigParams) => {
     localStorage.setItem('ak', JSON.stringify(values));
   };

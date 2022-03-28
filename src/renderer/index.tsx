@@ -1,4 +1,5 @@
 import 'normalize.css';
+import { MemoryRouter as Router } from 'react-router-dom';
 import { render } from 'react-dom';
 import zhCN from 'antd/lib/locale/zh_CN';
 import { ConfigProvider } from 'antd';
@@ -8,7 +9,9 @@ import 'antd/dist/antd.css';
 
 render(
   <ConfigProvider locale={zhCN}>
-    <App />
+    <Router>
+      <App />
+    </Router>
   </ConfigProvider>,
   document.getElementById('root')
 );
