@@ -1,28 +1,21 @@
 import { contextBridge, ipcRenderer } from 'electron';
+import type { ConfigParams } from '../renderer/type';
 
 contextBridge.exposeInMainWorld('electron', {
   ipcRenderer: {
-    list() {
-      ipcRenderer.send('client');
+    handleOss(...rest: any[]) {
+      return ipcRenderer.invoke('handleOss', ...rest);
     },
-    myPing() {
-      ipcRenderer.send('ipc-example', 'ping');
+    initOssClient(ak: ConfigParams) {
+      return ipcRenderer.invoke('initOssClient', ak);
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     on(channel: string, func: (...args: any[]) => void) {
-      const validChannels = ['ipc-example', 'client'];
-      if (validChannels.includes(channel)) {
-        // Deliberately strip event as it includes `sender`
-        ipcRenderer.on(channel, (_event, ...args) => func(...args));
-      }
+      ipcRenderer.on(channel, (_event, ...args) => func(...args));
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     once(channel: string, func: (...args: any[]) => void) {
-      const validChannels = ['ipc-example', 'client'];
-      if (validChannels.includes(channel)) {
-        // Deliberately strip event as it includes `sender`
-        ipcRenderer.once(channel, (_event, ...args) => func(...args));
-      }
+      ipcRenderer.once(channel, (_event, ...args) => func(...args));
     },
   },
 });

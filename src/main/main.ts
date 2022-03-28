@@ -1,13 +1,5 @@
 /* eslint global-require: off, no-console: off, promise/always-return: off */
 
-/**
- * This module executes inside of electron's main process. You can start
- * electron renderer process from here and communicate with the other processes
- * through IPC.
- *
- * When running `npm run build` or `npm run build:main`, this file is compiled to
- * `./src/main.js` using webpack. This gives us some performance wins.
- */
 import path from 'path';
 import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
@@ -15,9 +7,9 @@ import log from 'electron-log';
 import OSS from 'ali-oss';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
-
+import type { ConfigParams } from '../renderer/type';
 // oss有些方法只能在node端使用https://github.com/ali-sdk/ali-oss#browser-usage
-// const client = new OSS({});
+let client: null | OSS = null;
 
 export default class AppUpdater {
   constructor() {
@@ -29,23 +21,20 @@ export default class AppUpdater {
 
 let mainWindow: BrowserWindow | null = null;
 
-ipcMain.on('ipc-example', async (event, arg) => {
-  const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
-  console.log(msgTemplate(arg));
-  event.reply('ipc-example', msgTemplate('pong'));
+ipcMain.handle('handleOss', async (event, method, ...args) => {
+  console.log(method, ...args);
+  return client?.[method](...args);
 });
 
-ipcMain.on('client', async (event) => {
-  const list = [];
-  try {
-    // list = await client.listBuckets();
-  } catch (error) {
-    console.log(error);
-  }
-
-  event.reply('client', list);
+ipcMain.handle('initOssClient', async (event, ak: ConfigParams) => {
+  client = new OSS({
+    region: ak.region,
+    accessKeyId: ak.accessKeyId!,
+    accessKeySecret: ak.accessKeySecret!,
+    bucket: 'pi-version-backup',
+  });
+  return 0;
 });
-
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
   sourceMapSupport.install();
