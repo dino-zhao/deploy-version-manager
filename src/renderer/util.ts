@@ -1,6 +1,6 @@
+/* eslint-disable no-await-in-loop */
 import type { ConfigParams, HandleOssParams } from './type';
 
-// eslint-disable-next-line import/prefer-default-export
 export function initOssClient(ak: ConfigParams) {
   return window.electron.ipcRenderer.initOssClient(ak);
 }
@@ -31,4 +31,36 @@ async function syncObject(bucketName: string) {
   //   ownerBucket: bucketName,
   // });
   // console.log(data);
+}
+// 在一个bucket中，将文件从一个目录复制到另一个目录，目录以斜线结尾
+export async function copyFolderInSameBucket() {
+  // from: string, to: string
+  const fileList: string[] = [];
+  let marker = null;
+  do {
+    const result = await handleOss({
+      method: 'list',
+      args: [
+        {
+          marker,
+          prefix: 'pi-admin-web-dev/aaa/',
+          // delimiter: '/',
+          'max-keys': 10,
+        },
+      ],
+    });
+    marker = result.nextMarker;
+    fileList.push(...result.objects.map((item) => item.name));
+  } while (marker);
+  console.log(fileList);
+  Promise.all(
+    fileList.map((item) => {
+      return handleOss({
+        method: 'copy',
+        args: [item.replace('aaa', 'bbb'), item],
+      });
+    })
+  )
+    .then(() => console.log('success'))
+    .catch((err) => console.log(err));
 }
