@@ -9,10 +9,13 @@ export default function ProjectList({ hasInit }: { hasInit: boolean }) {
   useEffect(() => {
     async function handle() {
       if (hasInit) {
-        const data = await handleOss('list', {
-          prefix: '',
-          delimiter: '/',
-          'max-keys': 1000,
+        const data = await handleOss({
+          method: 'list',
+          args: {
+            prefix: '',
+            delimiter: '/',
+            'max-keys': 1000,
+          },
         });
         setList(data.prefixes);
       }

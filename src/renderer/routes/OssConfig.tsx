@@ -10,7 +10,7 @@ const layout = {
 const tailLayout = {
   wrapperCol: { offset: 8, span: 16 },
 };
-const ak = JSON.parse(localStorage.getItem('ak') ?? '');
+const ak = JSON.parse(localStorage.getItem('ak') ?? '{}');
 const initialValues: ConfigParams = {
   deployBucketLists: ['pi-admin-web', 'pi-console-web'],
   region: 'oss-cn-hangzhou',

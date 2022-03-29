@@ -6,9 +6,9 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import OSS from 'ali-oss';
 import { resolveHtmlPath } from './util';
-import type { ConfigParams } from '../renderer/type';
+import type { ConfigParams, HandleOssParams } from '../renderer/type';
 // oss有些方法只能在node端使用https://github.com/ali-sdk/ali-oss#browser-usage
-let client: null | OSS = null;
+const client: { [name: string]: OSS } = {};
 
 export default class AppUpdater {
   constructor() {
@@ -20,18 +20,24 @@ export default class AppUpdater {
 
 let mainWindow: BrowserWindow | null = null;
 
-ipcMain.handle('handleOss', async (event, method, ...args) => {
-  console.log(method, ...args);
-  return client?.[method](...args);
-});
+ipcMain.handle(
+  'handleOss',
+  async (event, { method, args, ownerBucket }: HandleOssParams) => {
+    return client?.[ownerBucket ?? 'default']?.[method](args);
+  }
+);
 
 ipcMain.handle('initOssClient', async (event, ak: ConfigParams) => {
-  client = new OSS({
-    region: ak.region,
-    accessKeyId: ak.accessKeyId!,
-    accessKeySecret: ak.accessKeySecret!,
-    bucket: 'pi-version-backup',
+  const bucketList = ak.deployBucketLists.concat(ak.backupBucket);
+  bucketList.forEach((item) => {
+    client[item] = new OSS({
+      region: ak.region,
+      accessKeyId: ak.accessKeyId!,
+      accessKeySecret: ak.accessKeySecret!,
+      bucket: item,
+    });
   });
+  client.default = client[ak.backupBucket];
   return 0;
 });
 if (process.env.NODE_ENV === 'production') {

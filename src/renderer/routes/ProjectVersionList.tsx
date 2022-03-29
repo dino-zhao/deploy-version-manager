@@ -8,10 +8,13 @@ export default function ProjectVersionList() {
   const [list, setList] = useState([]);
   useEffect(() => {
     async function handle() {
-      const data = await handleOss('list', {
-        prefix: `${project}/`,
-        delimiter: '/',
-        'max-keys': 1000,
+      const data = await handleOss({
+        method: 'list',
+        args: {
+          prefix: `${project}/`,
+          delimiter: '/',
+          'max-keys': 1000,
+        },
       });
       setList(data.prefixes);
     }
