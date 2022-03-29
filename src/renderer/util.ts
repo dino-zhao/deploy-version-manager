@@ -33,8 +33,7 @@ async function syncObject(bucketName: string) {
   // console.log(data);
 }
 // 在一个bucket中，将文件从一个目录复制到另一个目录，目录以斜线结尾
-export async function copyFolderInSameBucket() {
-  // from: string, to: string
+export async function copyFolderInSameBucket(from: string, to: string) {
   const fileList: string[] = [];
   let marker = null;
   do {
@@ -43,7 +42,7 @@ export async function copyFolderInSameBucket() {
       args: [
         {
           marker,
-          prefix: 'pi-admin-web-dev/aaa/',
+          prefix: from,
           // delimiter: '/',
           'max-keys': 10,
         },
@@ -57,7 +56,7 @@ export async function copyFolderInSameBucket() {
     fileList.map((item) => {
       return handleOss({
         method: 'copy',
-        args: [item.replace('aaa', 'bbb'), item],
+        args: [item.replace(from, to), item],
       });
     })
   )

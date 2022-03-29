@@ -37,7 +37,16 @@ export default function ProjectList({ hasInit }: { hasInit: boolean }) {
     <>
       <Header>Header</Header>
       <Content style={{ height: 'calc(100vh - 134px)', padding: '20px' }}>
-        <Button onClick={() => copyFolderInSameBucket()}> 测试</Button>
+        <Button
+          onClick={() =>
+            copyFolderInSameBucket(
+              'pi-admin-web-dev/bbb/',
+              'pi-admin-web-dev/ccc/'
+            )
+          }
+        >
+          测试
+        </Button>
         <List
           header={<div>待备份列表</div>}
           dataSource={projectList}
