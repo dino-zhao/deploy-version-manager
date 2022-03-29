@@ -3,7 +3,7 @@ import { List, Layout } from 'antd';
 import { Link, Outlet } from 'react-router-dom';
 import { handleOss } from '../util';
 
-const { Header, Footer, Sider, Content } = Layout;
+const { Header, Footer, Content } = Layout;
 export default function ProjectList({ hasInit }: { hasInit: boolean }) {
   const [projectList, setList] = useState([]);
   useEffect(() => {
