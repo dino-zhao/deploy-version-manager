@@ -20,12 +20,11 @@ export default class AppUpdater {
 
 let mainWindow: BrowserWindow | null = null;
 
-ipcMain.handle(
-  'handleOss',
-  async (event, { method, args, ownerBucket }: HandleOssParams) => {
-    return client?.[ownerBucket ?? 'default']?.[method](args);
-  }
-);
+ipcMain.handle('handleOss', async (event, params: HandleOssParams) => {
+  const { method, args, ownerBucket } = params;
+  console.log(...(args ?? []));
+  return client?.[ownerBucket ?? 'default']?.[method](...(args ?? []));
+});
 
 ipcMain.handle('initOssClient', async (event, ak: ConfigParams) => {
   const bucketList = ak.deployBucketLists.concat(ak.backupBucket);

@@ -10,17 +10,20 @@ export default function ProjectVersionList() {
     async function handle() {
       const data = await handleOss({
         method: 'list',
-        args: {
-          prefix: `${project}/`,
-          delimiter: '/',
-          'max-keys': 1000,
-        },
+        args: [
+          {
+            prefix: `${project}/`,
+            delimiter: '/',
+            'max-keys': 1000,
+          },
+        ],
       });
-      setList(data.prefixes);
+      setList(data.prefixes ?? []);
     }
 
     handle();
   }, [project]);
+
   return (
     <>
       <Button>同步</Button>

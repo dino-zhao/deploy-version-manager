@@ -10,5 +10,5 @@ export interface ConfigParams {
 export interface HandleOssParams {
   method: any;
   ownerBucket?: string;
-  args: Record<string, unknown>;
+  args?: any[];
 }
