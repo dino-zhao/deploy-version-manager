@@ -1,16 +1,14 @@
 import { useEffect, useState } from 'react';
 import { List, Layout, Button } from 'antd';
 import { Link, Outlet } from 'react-router-dom';
-import { handleOss, copyFolderInSameBucket } from '../util';
+import {
+  handleOss,
+  copyFolderInSameBucket,
+  syncObject,
+  listFiles,
+} from '../util';
 
 const { Header, Footer, Content } = Layout;
-async function syncObject() {
-  const data = await handleOss({
-    method: 'copy',
-    args: ['pi-admin-web-dev/bbb/a.txt', 'pi-admin-web-dev/aaa/b.txt'],
-  });
-  console.log(data);
-}
 
 export default function ProjectList({ hasInit }: { hasInit: boolean }) {
   const [projectList, setList] = useState([]);
@@ -45,15 +43,32 @@ export default function ProjectList({ hasInit }: { hasInit: boolean }) {
             )
           }
         >
-          测试
+          测试copy
         </Button>
+        <div>
+          <Button
+            onClick={async () => {
+              console.log(await listFiles({}));
+            }}
+          >
+            测试list
+          </Button>
+        </div>
         <List
           header={<div>待备份列表</div>}
           dataSource={projectList}
           renderItem={(item) => (
             <List.Item>
               <Link to={`/${item}`}>{item}</Link>
-              <Button type="primary" onClick={() => syncObject()}>
+              <Button
+                type="primary"
+                onClick={() =>
+                  syncObject({
+                    deployBucket: item,
+                    backupBucket: 'pi-version-backup',
+                  })
+                }
+              >
                 查看信息
               </Button>
             </List.Item>
