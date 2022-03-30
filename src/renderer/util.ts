@@ -78,7 +78,7 @@ export async function syncObject({
       await handleOss({
         method: 'head',
         ownerBucket: backupBucket,
-        args: [`${deployBucket}/${createTime}`],
+        args: [`${deployBucket}/${createTime}/index.html`],
       });
       return true;
     } catch (error) {
@@ -88,7 +88,7 @@ export async function syncObject({
   const isExist = await checkIfisExist();
   // 3.如果有则退出，否则创建文件夹，复制
   if (isExist) {
-    console.log('已存在');
+    return console.log('已存在');
   }
   async function copyBetweenBuckets() {
     const fileList = await listFilesofPath({
@@ -108,6 +108,7 @@ export async function syncObject({
   }
   await copyBetweenBuckets();
   console.log('复制成功');
+  return 0;
 }
 // 在一个bucket中，将文件从一个目录复制到另一个目录，目录以斜线结尾
 export async function copyFolderInSameBucket(from: string, to: string) {
