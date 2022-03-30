@@ -1,5 +1,6 @@
 /* eslint-disable no-await-in-loop */
 import moment from 'moment';
+import { from, mergeAll, defer } from 'rxjs';
 import type { ConfigParams, HandleOssParams } from './type';
 
 export function initOssClient(ak: ConfigParams) {
@@ -94,17 +95,29 @@ export async function syncObject({
     const fileList = await listFilesofPath({
       bucketName: deployBucket,
     });
-    await Promise.all(
-      fileList.slice(0, 1).map((item) => {
-        console.log(
-          `copy from${deployBucket}/${item}to${deployBucket}/${createTime}/${item}`
-        );
-        return handleOss({
-          method: 'copy',
-          args: [`${deployBucket}/${createTime}/${item}`, item, deployBucket],
+    return new Promise((resolve, reject) => {
+      const observables = fileList.map((item) =>
+        defer(() => {
+          console.log(
+            `copy from ${deployBucket}/${item} to ${deployBucket}/${createTime}/${item}`
+          );
+          return handleOss({
+            method: 'copy',
+            args: [`${deployBucket}/${createTime}/${item}`, item, deployBucket],
+          });
+        })
+      );
+      from(observables)
+        .pipe(mergeAll(30))
+        .subscribe({
+          error: () => {
+            reject(new Error('复制错误'));
+          },
+          complete: () => {
+            resolve('success');
+          },
         });
-      })
-    );
+    });
   }
   await copyBetweenBuckets();
   console.log('复制成功');
