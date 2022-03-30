@@ -68,6 +68,11 @@ export async function syncObject({
       args: [{ prefix: 'index.html' }],
       ownerBucket: deployBucket,
     });
+    console.log({
+      method: 'list',
+      args: [{ prefix: 'index.html' }],
+      ownerBucket: deployBucket,
+    });
     return moment(data.objects[0].lastModified).format(
       moment.HTML5_FMT.DATETIME_LOCAL_SECONDS
     );

@@ -1,16 +1,12 @@
 import { useEffect, useState } from 'react';
 import { List, Layout, Button } from 'antd';
 import { Link, Outlet } from 'react-router-dom';
-import {
-  handleOss,
-  copyFolderInSameBucket,
-  syncObject,
-  listFiles,
-} from '../util';
+import { handleOss, syncObject, listFiles } from '../util';
+import HeaderContent from './views/HeaderContent';
 
 const { Header, Footer, Content } = Layout;
 
-export default function ProjectList({ hasInit }: { hasInit: boolean }) {
+export default function Main({ hasInit }: { hasInit: boolean }) {
   const [projectList, setList] = useState([]);
   useEffect(() => {
     async function handle() {
@@ -33,18 +29,16 @@ export default function ProjectList({ hasInit }: { hasInit: boolean }) {
   }, [hasInit]);
   return (
     <>
-      <Header>Header</Header>
-      <Content style={{ height: 'calc(100vh - 134px)', padding: '20px' }}>
-        <Button
-          onClick={() =>
-            copyFolderInSameBucket(
-              'pi-admin-web-dev/bbb/',
-              'pi-admin-web-dev/ccc/'
-            )
-          }
-        >
-          测试copy
-        </Button>
+      <Header>
+        <HeaderContent />
+      </Header>
+      <Content
+        style={{
+          height: 'calc(100vh - 134px)',
+          padding: '20px',
+          overflow: 'scroll',
+        }}
+      >
         <div>
           <Button
             onClick={async () => {
@@ -69,7 +63,7 @@ export default function ProjectList({ hasInit }: { hasInit: boolean }) {
                   })
                 }
               >
-                查看信息
+                同步最新备份
               </Button>
             </List.Item>
           )}
