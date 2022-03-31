@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { List, Button } from 'antd';
+import { List, Button, Modal } from 'antd';
 import { handleOss } from '../util';
 
-export default function VersionList() {
-  const { project } = useParams();
+export default function VersionList({ project }: { project: string }) {
   const [list, setList] = useState([]);
   useEffect(() => {
     async function handle() {
@@ -36,14 +34,24 @@ export default function VersionList() {
 }
 
 export function Item({ project }: { project: string }) {
+  const [visible, setVisible] = useState(false);
   return (
-    <Button
-      type="link"
-      onClick={() => {
-        console.log(project);
-      }}
-    >
-      {project}
-    </Button>
+    <>
+      <Button
+        type="link"
+        onClick={() => {
+          setVisible(true);
+        }}
+      >
+        {project}
+      </Button>
+      <Modal
+        visible={visible}
+        onCancel={() => setVisible(false)}
+        title="已备份版本"
+      >
+        <VersionList project={project} />
+      </Modal>
+    </>
   );
 }
