@@ -6,15 +6,12 @@ import { ConfigProvider } from 'antd';
 import App from './App';
 import 'moment/locale/zh-cn';
 import 'antd/dist/antd.css';
-import { StoreProvider } from './store';
 
 render(
   <ConfigProvider locale={zhCN}>
-    <StoreProvider>
-      <Router>
-        <App />
-      </Router>
-    </StoreProvider>
+    <Router>
+      <App />
+    </Router>
   </ConfigProvider>,
   document.getElementById('root')
 );

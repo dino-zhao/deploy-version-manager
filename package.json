@@ -231,6 +231,7 @@
   },
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
+    "@reduxjs/toolkit": "^1.8.0",
     "@types/ali-oss": "^6.16.3",
     "ali-oss": "^6.17.1",
     "antd": "^4.19.4",
@@ -242,6 +243,7 @@
     "normalize.css": "^8.0.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
+    "react-redux": "^7.2.6",
     "react-router-dom": "^6.2.2",
     "rxjs": "^7.5.5",
     "styled-components": "^5.3.5"
