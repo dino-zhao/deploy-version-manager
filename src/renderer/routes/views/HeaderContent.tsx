@@ -2,6 +2,13 @@ import styled from 'styled-components';
 import { SettingTwoTone } from '@ant-design/icons';
 import { Modal } from 'antd';
 import { useState } from 'react';
+import {
+  useAppSelector,
+  selectIsInit,
+  useAppDispatch,
+  initOss,
+} from 'renderer/store';
+import { initOssClient } from 'renderer/util';
 import OssConfig from './OssConfig';
 
 const Wrap = styled.div`
@@ -13,6 +20,19 @@ const Wrap = styled.div`
 
 export default function HeaderContent() {
   const [visibel, setVisile] = useState(false);
+  const isInit = useAppSelector(selectIsInit);
+  const dispatch = useAppDispatch();
+  const localAk = localStorage.getItem('ak');
+  if (!localAk) {
+    setVisile(true);
+  } else if (!isInit) {
+    initOssClient(JSON.parse(localAk))
+      .then((res) => {
+        dispatch(initOss());
+        return res;
+      })
+      .catch((err) => console.log(err));
+  }
   return (
     <>
       <Wrap>
@@ -32,7 +52,7 @@ export default function HeaderContent() {
         onCancel={() => setVisile(false)}
         footer={null}
       >
-        <OssConfig />
+        <OssConfig hide={() => setVisile(false)} />
       </Modal>
     </>
   );

@@ -1,16 +1,30 @@
 import { useEffect, useState } from 'react';
-import { List, Layout, Button } from 'antd';
+import { List, Layout, Button, message } from 'antd';
 import { Link, Outlet } from 'react-router-dom';
+import { useAppSelector } from 'renderer/store';
 import { handleOss, syncObject } from '../util';
 import HeaderContent from './views/HeaderContent';
 
 const { Header, Content } = Layout;
+interface LoadingParams {
+  [str: string]: boolean;
+}
 
-export default function Main({ hasInit }: { hasInit: boolean }) {
-  const [projectList, setList] = useState([]);
+export default function Main() {
+  const [projectList, setList] = useState<string[]>([]);
+  const { isInit, config } = useAppSelector((state) => state.ossConfig);
+  const [loadingState, setLoading] = useState<LoadingParams>({});
+  useEffect(() => {
+    const obj: LoadingParams = {};
+    projectList.forEach((item) => {
+      obj[item] = false;
+    });
+    setLoading(obj);
+  }, [projectList]);
+  console.log(loadingState);
   useEffect(() => {
     async function handle() {
-      if (hasInit) {
+      if (isInit) {
         const data = await handleOss({
           method: 'list',
           args: [
@@ -21,12 +35,16 @@ export default function Main({ hasInit }: { hasInit: boolean }) {
             },
           ],
         });
-        setList(data.prefixes.map((item: string) => item.slice(0, -1)));
+        setList(
+          data.prefixes
+            .map((item: string) => item.slice(0, -1))
+            .filter((item: string) => config.deployBucketLists.includes(item))
+        );
       }
     }
 
     handle();
-  }, [hasInit]);
+  }, [isInit, config]);
   return (
     <>
       <Header>
@@ -46,13 +64,18 @@ export default function Main({ hasInit }: { hasInit: boolean }) {
             <List.Item>
               <Link to={`/${item}`}>{item}</Link>
               <Button
+                loading={loadingState[item]}
                 type="primary"
-                onClick={() =>
-                  syncObject({
-                    deployBucket: item,
-                    backupBucket: 'pi-version-backup',
-                  })
-                }
+                onClick={async () => {
+                  setLoading((state) => ({ ...state, [item]: true }));
+                  message.info(
+                    await syncObject({
+                      deployBucket: item,
+                      backupBucket: 'pi-version-backup',
+                    })
+                  );
+                  setLoading((state) => ({ ...state, [item]: false }));
+                }}
               >
                 同步最新备份
               </Button>

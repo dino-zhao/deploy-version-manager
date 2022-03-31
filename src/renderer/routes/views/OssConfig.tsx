@@ -1,4 +1,10 @@
 import { Form, Input, Button, Select } from 'antd';
+import {
+  useAppSelector,
+  selectConfig,
+  useAppDispatch,
+  mutateConfig,
+} from 'renderer/store';
 import type { ConfigParams } from '../../type';
 
 const { Item } = Form;
@@ -9,21 +15,18 @@ const layout = {
 const tailLayout = {
   wrapperCol: { offset: 8, span: 16 },
 };
-const ak = JSON.parse(localStorage.getItem('ak') ?? '{}');
-const initialValues: ConfigParams = {
-  deployBucketLists: ['pi-admin-web1', 'pi-console-web1', 'pi-admin-web-dev'],
-  region: 'oss-cn-hangzhou',
-  accessKeyId: ak.accessKeyId ?? '',
-  accessKeySecret: ak.accessKeySecret ?? '',
-  backupBucket: 'pi-version-backup',
-};
-export default function OssConfig() {
+
+export default function OssConfig({ hide }: { hide: () => void }) {
+  const config = useAppSelector(selectConfig);
+  const dispatch = useAppDispatch();
   const onFinish = (values: ConfigParams) => {
     localStorage.setItem('ak', JSON.stringify(values));
+    dispatch(mutateConfig(values));
+    hide();
   };
   return (
     <div style={{ display: 'flex', justifyContent: 'center' }}>
-      <Form {...layout} initialValues={initialValues} onFinish={onFinish}>
+      <Form {...layout} initialValues={config} onFinish={onFinish}>
         <Item name="region" label="region" rules={[{ required: true }]}>
           <Input placeholder="请输入region" />
         </Item>
