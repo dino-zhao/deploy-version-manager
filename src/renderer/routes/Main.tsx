@@ -21,7 +21,6 @@ export default function Main() {
     });
     setLoading(obj);
   }, [projectList]);
-  console.log(loadingState);
   useEffect(() => {
     async function handle() {
       if (isInit) {
