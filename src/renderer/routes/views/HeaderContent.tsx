@@ -27,7 +27,7 @@ export default function HeaderContent() {
         />
       </Wrap>
       <Modal
-        title="Basic Modal"
+        title="配置"
         visible={visibel}
         onCancel={() => setVisile(false)}
         footer={null}
