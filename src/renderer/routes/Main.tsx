@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { List, Layout, Button, message } from 'antd';
-import { Link, Outlet } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import { useAppSelector } from 'renderer/store';
 import { handleOss, syncObject } from '../util';
 import HeaderContent from './views/HeaderContent';
+import { Item } from './VersionList';
 
 const { Header, Content } = Layout;
 interface LoadingParams {
@@ -61,7 +62,7 @@ export default function Main() {
           dataSource={projectList}
           renderItem={(item) => (
             <List.Item>
-              <Link to={`/${item}`}>{item}</Link>
+              <Item project={item} />
               <Button
                 loading={loadingState[item]}
                 type="primary"

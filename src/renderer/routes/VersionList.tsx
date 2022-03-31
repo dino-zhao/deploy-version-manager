@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { List } from 'antd';
+import { List, Button } from 'antd';
 import { handleOss } from '../util';
 
 export default function VersionList() {
@@ -32,5 +32,18 @@ export default function VersionList() {
         renderItem={(item) => <List.Item>{item}</List.Item>}
       />
     </>
+  );
+}
+
+export function Item({ project }: { project: string }) {
+  return (
+    <Button
+      type="link"
+      onClick={() => {
+        console.log(project);
+      }}
+    >
+      {project}
+    </Button>
   );
 }
