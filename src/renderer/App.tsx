@@ -1,6 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import Main from './routes/Main';
-import ProjectVersionList from './routes/ProjectVersionList';
+import ProjectVersionList from './routes/VersionList';
 import './App.css';
 
 export default function App() {

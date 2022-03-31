@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { List } from 'antd';
 import { handleOss } from '../util';
 
-export default function ProjectVersionList() {
+export default function VersionList() {
   const { project } = useParams();
   const [list, setList] = useState([]);
   useEffect(() => {
