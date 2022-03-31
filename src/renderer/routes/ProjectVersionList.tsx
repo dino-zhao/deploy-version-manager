@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { List, Button } from 'antd';
+import { List } from 'antd';
 import { handleOss } from '../util';
 
 export default function ProjectVersionList() {
@@ -26,7 +26,6 @@ export default function ProjectVersionList() {
 
   return (
     <>
-      <Button>同步</Button>
       <List
         header={<div>已备份版本</div>}
         dataSource={list}

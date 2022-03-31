@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { List, Layout, Button } from 'antd';
 import { Link, Outlet } from 'react-router-dom';
-import { handleOss, syncObject, listFiles } from '../util';
+import { handleOss, syncObject } from '../util';
 import HeaderContent from './views/HeaderContent';
 
-const { Header, Footer, Content } = Layout;
+const { Header, Content } = Layout;
 
 export default function Main({ hasInit }: { hasInit: boolean }) {
   const [projectList, setList] = useState([]);
@@ -34,22 +34,13 @@ export default function Main({ hasInit }: { hasInit: boolean }) {
       </Header>
       <Content
         style={{
-          height: 'calc(100vh - 134px)',
+          height: 'calc(100vh - 64px)',
           padding: '20px',
-          overflow: 'scroll',
+          overflowY: 'auto',
         }}
       >
-        <div>
-          <Button
-            onClick={async () => {
-              console.log(await listFiles({}));
-            }}
-          >
-            测试list
-          </Button>
-        </div>
         <List
-          header={<div>待备份列表</div>}
+          header={<div>项目列表</div>}
           dataSource={projectList}
           renderItem={(item) => (
             <List.Item>
@@ -70,7 +61,6 @@ export default function Main({ hasInit }: { hasInit: boolean }) {
         />
         <Outlet />
       </Content>
-      <Footer>Footer</Footer>
     </>
   );
 }
