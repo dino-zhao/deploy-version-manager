@@ -6,13 +6,13 @@ interface ConfigState {
   config: ConfigParams;
   isInit: boolean;
 }
-
+const ak = JSON.parse(localStorage.getItem('ak') ?? '{}');
 const initialState: ConfigState = {
   config: {
     deployBucketLists: ['pi-admin-web1', 'pi-console-web1', 'pi-admin-web-dev'],
     region: 'oss-cn-hangzhou',
-    accessKeyId: '',
-    accessKeySecret: '',
+    accessKeyId: ak.accessKeyId ?? '',
+    accessKeySecret: ak.accessKeySecret ?? '',
     backupBucket: 'pi-version-backup',
   },
   isInit: false,

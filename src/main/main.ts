@@ -1,7 +1,7 @@
 /* eslint global-require: off, no-console: off, promise/always-return: off */
 
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import { app, BrowserWindow, shell, ipcMain, session } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import OSS from 'ali-oss';
@@ -131,8 +131,14 @@ app.on('window-all-closed', () => {
 
 app
   .whenReady()
-  .then(() => {
+  .then(async () => {
     createWindow();
+    if (isDevelopment) {
+      // 安装扩展 https://www.electronjs.org/docs/latest/tutorial/devtools-extension
+      await session.defaultSession.loadExtension(
+        path.join(__dirname, '../extensions/redux-devtools/3.0.9_0')
+      );
+    }
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
