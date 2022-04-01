@@ -1,9 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
-import { List, Button, message, Popconfirm } from 'antd';
+import { List, Button, message, Popconfirm, Space } from 'antd';
 import moment from 'moment';
-import { handleOss, deleteObjectWithinBackupBucket } from '../../util';
+import { useAppSelector, selectConfig } from 'renderer/store';
+import { handleOss, deleteObject, applySpecificVersion } from '../../util';
 
 export default function ListDrawer({ project }: { project: string }) {
+  const { backupBucket } = useAppSelector(selectConfig);
+
   const [listLoading, setListLoading] = useState(false);
   const getTimeString = useCallback(
     (str: string) => {
@@ -55,21 +58,42 @@ export default function ListDrawer({ project }: { project: string }) {
         loading={listLoading}
         renderItem={(item) => (
           <List.Item>
-            <span>{getTimeString(item)}</span>
-            <Popconfirm
-              title="确定删除当前版本吗?"
-              onConfirm={async () => {
-                try {
-                  await await deleteObjectWithinBackupBucket({ path: item });
-                  message.success('删除成功');
-                  await getVersionList();
-                } catch (error) {
-                  message.error('操作失败');
-                }
-              }}
-            >
-              <Button style={{ marginLeft: 'auto' }}>删除当前版本</Button>
-            </Popconfirm>
+            <span>{item}</span>
+            <Space style={{ marginLeft: 'auto' }}>
+              <Popconfirm
+                title="确定应用该版本么，会直接影响对应环境应用？"
+                onConfirm={async () => {
+                  try {
+                    message.success(
+                      await applySpecificVersion({
+                        version: item,
+                        backupBucket,
+                      })
+                    );
+                  } catch (error) {
+                    message.error('操作失败');
+                  }
+                }}
+              >
+                <Button danger onClick={() => console.log(item)}>
+                  应用该版本
+                </Button>
+              </Popconfirm>
+              <Popconfirm
+                title="确定删除当前版本吗?"
+                onConfirm={async () => {
+                  try {
+                    await deleteObject({ path: item });
+                    message.success('删除成功');
+                    await getVersionList();
+                  } catch (error) {
+                    message.error('操作失败');
+                  }
+                }}
+              >
+                <Button>删除当前版本</Button>
+              </Popconfirm>
+            </Space>
           </List.Item>
         )}
       />

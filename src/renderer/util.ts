@@ -68,11 +68,7 @@ export async function syncObject({
       args: [{ prefix: 'index.html' }],
       ownerBucket: deployBucket,
     });
-    console.log({
-      method: 'list',
-      args: [{ prefix: 'index.html' }],
-      ownerBucket: deployBucket,
-    });
+    console.log(data.objects[0]);
     return moment(data.objects[0].lastModified).format(
       moment.HTML5_FMT.DATETIME_LOCAL_SECONDS
     );
@@ -81,11 +77,12 @@ export async function syncObject({
   // 2.再检查备份文件夹内有没有对应备份
   async function checkIfisExist() {
     try {
-      await handleOss({
+      const meta = await handleOss({
         method: 'head',
         ownerBucket: backupBucket,
         args: [`${deployBucket}/${createTime}/index.html`],
       });
+      console.log(meta);
       return true;
     } catch (error) {
       return false;
@@ -128,7 +125,7 @@ export async function syncObject({
   return '同步成功';
 }
 
-export async function deleteObjectWithinBackupBucket({
+export async function deleteObject({
   path,
   bucketName,
 }: {
@@ -140,42 +137,66 @@ export async function deleteObjectWithinBackupBucket({
     path,
     bucketName,
   });
+  if (fileList.length === 0) {
+    return '当前待删除文件为空';
+  }
   // 2.依次删除
   return handleOss({
+    ownerBucket: bucketName,
     method: 'deleteMulti',
     args: [fileList, { quiet: true }],
   });
 }
 
-// 在一个bucket中，将文件从一个目录复制到另一个目录，目录以斜线结尾
-export async function copyFolderInSameBucket(from: string, to: string) {
-  const fileList: string[] = [];
-  let marker = null;
-  do {
-    const result = await handleOss({
-      method: 'list',
-      args: [
-        {
-          marker,
-          prefix: from,
-          // delimiter: '/',
-          'max-keys': 10,
-        },
-      ],
+export async function applySpecificVersion({
+  version,
+  backupBucket,
+}: {
+  version: string;
+  backupBucket: string;
+}) {
+  // 1.删除对应bucket
+  const targetBucket = version.slice(0, -21);
+  await deleteObject({
+    bucketName: targetBucket,
+  });
+  // 2.将该版本复制过去
+  async function copyBetweenBuckets() {
+    const fileList = await listFilesofPath({
+      path: version,
     });
-    marker = result.nextMarker;
-    fileList.push(...result.objects.map((item) => item.name));
-    console.log(result);
-  } while (marker);
-  console.log(fileList);
-  Promise.all(
-    fileList.map((item) => {
-      return handleOss({
-        method: 'copy',
-        args: [item.replace(from, to), item],
-      });
-    })
-  )
-    .then(() => console.log('success'))
-    .catch((err) => console.log(err));
+    return new Promise((resolve, reject) => {
+      const observables = fileList.map((item) =>
+        defer(() => {
+          console.log(`copy from ${backupBucket}/${item} to ${targetBucket}`);
+          return handleOss({
+            method: 'copy',
+            ownerBucket: targetBucket,
+            args: [
+              item.replace(version, ''),
+              item,
+              backupBucket,
+              {
+                meta: {
+                  'apply-time': '3333',
+                },
+              },
+            ],
+          });
+        })
+      );
+      from(observables)
+        .pipe(mergeAll(50))
+        .subscribe({
+          error: () => {
+            reject(new Error('复制错误'));
+          },
+          complete: () => {
+            resolve('success');
+          },
+        });
+    });
+  }
+  await copyBetweenBuckets();
+  return `应用版本${version}成功`;
 }
