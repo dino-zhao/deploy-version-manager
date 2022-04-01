@@ -20,7 +20,6 @@ export default function OssConfig({ hide }: { hide: () => void }) {
   const config = useAppSelector(selectConfig);
   const dispatch = useAppDispatch();
   const onFinish = (values: ConfigParams) => {
-    console.log(values);
     localStorage.setItem('ak', JSON.stringify(values));
     dispatch(mutateConfig(values));
     hide();

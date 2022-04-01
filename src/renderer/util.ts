@@ -29,7 +29,7 @@ async function listFilesofPath({
   bucketName,
   path,
 }: {
-  bucketName: string;
+  bucketName?: string;
   path?: string;
 }) {
   const fileList: string[] = [];
@@ -127,6 +127,19 @@ export async function syncObject({
   await copyBetweenBuckets();
   return '同步成功';
 }
+
+export async function deleteObjectWithinBackupBucket(prefix: string) {
+  // 1.列举要删除的文件
+  const fileList = await listFilesofPath({
+    path: prefix,
+  });
+  // 2.依次删除
+  return handleOss({
+    method: 'deleteMulti',
+    args: [fileList, { quiet: true }],
+  });
+}
+
 // 在一个bucket中，将文件从一个目录复制到另一个目录，目录以斜线结尾
 export async function copyFolderInSameBucket(from: string, to: string) {
   const fileList: string[] = [];
