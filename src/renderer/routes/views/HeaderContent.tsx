@@ -17,10 +17,11 @@ export default function HeaderContent() {
   const [visibel, setVisile] = useState(false);
   const { config } = useAppSelector((state) => state.ossConfig);
   const dispatch = useAppDispatch();
-  if (!localStorage.getItem('ak')) {
-    setVisile(true);
-  }
+
   useEffect(() => {
+    if (!localStorage.getItem('ak')) {
+      setVisile(true);
+    }
     if (config.accessKeyId) {
       initOssClient(config)
         .then((res) => {
