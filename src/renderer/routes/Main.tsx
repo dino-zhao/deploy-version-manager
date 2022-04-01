@@ -25,21 +25,28 @@ export default function Main() {
   useEffect(() => {
     async function handle() {
       if (isInit) {
-        const data = await handleOss({
-          method: 'list',
-          args: [
-            {
-              prefix: '',
-              delimiter: '/',
-              'max-keys': 1000,
-            },
-          ],
-        });
-        setList(
-          data.prefixes
-            .map((item: string) => item.slice(0, -1))
-            .filter((item: string) => config.deployBucketLists.includes(item))
-        );
+        try {
+          const data = await handleOss({
+            method: 'list',
+            args: [
+              {
+                prefix: '',
+                delimiter: '/',
+                'max-keys': 1000,
+              },
+            ],
+          });
+          setList(
+            data.prefixes
+              .map((item: string) => item.slice(0, -1))
+              .filter((item: string) => config.deployBucketLists.includes(item))
+          );
+        } catch (error) {
+          // 这里通常处理ak错误
+          if (typeof error === 'object') {
+            message.error(error?.toString());
+          }
+        }
       }
     }
 
