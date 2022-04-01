@@ -62,36 +62,36 @@ export async function syncObject({
 }) {
   // 1.先检查待备份文件的index文件的修改时间
   async function getIndexCreateTime() {
-    // 检查当前bucket的index.html文件的创建时间
-    const data = await handleOss({
-      method: 'list',
-      args: [{ prefix: 'index.html' }],
+    // 检查当前bucket的index.html文件的创建时间或者回退版本
+    const metaData = await handleOss({
+      method: 'head',
+      args: ['index.html'],
       ownerBucket: deployBucket,
     });
-    console.log(data.objects[0]);
-    return moment(data.objects[0].lastModified).format(
-      moment.HTML5_FMT.DATETIME_LOCAL_SECONDS
-    );
+    // 由于复制时last-modified会修改，因此添加了字定义metadata
+    const timeString =
+      metaData.meta?.['apply-time'] ?? metaData.res.headers['last-modified'];
+    return moment(timeString).format(moment.HTML5_FMT.DATETIME_LOCAL_SECONDS);
   }
   const createTime = await getIndexCreateTime();
   // 2.再检查备份文件夹内有没有对应备份
   async function checkIfisExist() {
+    const version = `${deployBucket}/${createTime}/`;
     try {
-      const meta = await handleOss({
+      await handleOss({
         method: 'head',
         ownerBucket: backupBucket,
-        args: [`${deployBucket}/${createTime}/index.html`],
+        args: [`${version}index.html`],
       });
-      console.log(meta);
-      return true;
+      return version;
     } catch (error) {
-      return false;
+      return '';
     }
   }
-  const isExist = await checkIfisExist();
+  const curVersion = await checkIfisExist();
   // 3.如果有则退出，否则创建文件夹，复制
-  if (isExist) {
-    return '已存在';
+  if (curVersion) {
+    return `版本${curVersion}已同步`;
   }
   async function copyBetweenBuckets() {
     const fileList = await listFilesofPath({
@@ -105,7 +105,17 @@ export async function syncObject({
           );
           return handleOss({
             method: 'copy',
-            args: [`${deployBucket}/${createTime}/${item}`, item, deployBucket],
+            args: [
+              `${deployBucket}/${createTime}/${item}`,
+              item,
+              deployBucket,
+              // 没有声明的header和meta会默认带过去
+              {
+                meta: {
+                  'apply-time': createTime,
+                },
+              },
+            ],
           });
         })
       );
@@ -172,16 +182,7 @@ export async function applySpecificVersion({
           return handleOss({
             method: 'copy',
             ownerBucket: targetBucket,
-            args: [
-              item.replace(version, ''),
-              item,
-              backupBucket,
-              {
-                meta: {
-                  'apply-time': '3333',
-                },
-              },
-            ],
+            args: [item.replace(version, ''), item, backupBucket],
           });
         })
       );
