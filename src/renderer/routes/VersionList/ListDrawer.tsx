@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { List, Button, Drawer, message, Popconfirm } from 'antd';
+import { List, Button, message, Popconfirm } from 'antd';
 import moment from 'moment';
-import { handleOss, deleteObjectWithinBackupBucket } from '../util';
+import { handleOss, deleteObjectWithinBackupBucket } from '../../util';
 
-export default function VersionList({ project }: { project: string }) {
+export default function ListDrawer({ project }: { project: string }) {
   const [listLoading, setListLoading] = useState(false);
   const getTimeString = useCallback(
     (str: string) => {
@@ -57,10 +57,10 @@ export default function VersionList({ project }: { project: string }) {
           <List.Item>
             <span>{getTimeString(item)}</span>
             <Popconfirm
-              title="Are you sure to delete this task?"
+              title="确定删除当前版本吗?"
               onConfirm={async () => {
                 try {
-                  await await deleteObjectWithinBackupBucket(item);
+                  await await deleteObjectWithinBackupBucket({ path: item });
                   message.success('删除成功');
                   await getVersionList();
                 } catch (error) {
@@ -73,32 +73,6 @@ export default function VersionList({ project }: { project: string }) {
           </List.Item>
         )}
       />
-    </>
-  );
-}
-
-export function Item({ project }: { project: string }) {
-  const [visible, setVisible] = useState(false);
-  return (
-    <>
-      <Button
-        type="link"
-        onClick={() => {
-          setVisible(true);
-        }}
-      >
-        {project}
-      </Button>
-      <Drawer
-        visible={visible}
-        closable={false}
-        onClose={() => setVisible(false)}
-        title=""
-        destroyOnClose
-        width={800}
-      >
-        <VersionList project={project} />
-      </Drawer>
     </>
   );
 }

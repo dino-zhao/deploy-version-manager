@@ -128,10 +128,17 @@ export async function syncObject({
   return '同步成功';
 }
 
-export async function deleteObjectWithinBackupBucket(prefix: string) {
+export async function deleteObjectWithinBackupBucket({
+  path,
+  bucketName,
+}: {
+  bucketName?: string;
+  path?: string;
+}) {
   // 1.列举要删除的文件
   const fileList = await listFilesofPath({
-    path: prefix,
+    path,
+    bucketName,
   });
   // 2.依次删除
   return handleOss({

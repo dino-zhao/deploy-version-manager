@@ -4,7 +4,7 @@ import { Outlet } from 'react-router-dom';
 import { useAppSelector } from 'renderer/store';
 import { handleOss, syncObject } from '../util';
 import HeaderContent from './views/HeaderContent';
-import { Item } from './VersionList';
+import Item from './VersionList';
 
 const { Header, Content } = Layout;
 interface LoadingParams {
