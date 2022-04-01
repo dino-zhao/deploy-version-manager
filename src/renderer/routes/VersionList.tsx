@@ -1,9 +1,21 @@
-import { useState, useEffect } from 'react';
-import { List, Button, Modal } from 'antd';
+import { useState, useEffect, useCallback } from 'react';
+import { List, Button, Drawer } from 'antd';
+import moment from 'moment';
 import { handleOss } from '../util';
 
 export default function VersionList({ project }: { project: string }) {
-  const [list, setList] = useState([]);
+  function getTimeString(str: string) {
+    return str.replace(/\//g, '').replace(project, '');
+  }
+
+  const [list, setList] = useState<string[]>([]);
+
+  function sortList(arr: string[]) {
+    const cur = arr.filter((item) => {
+      return moment(getTimeString(item)).isValid();
+    });
+    return cur;
+  }
   useEffect(() => {
     async function handle() {
       const data = await handleOss({
@@ -16,7 +28,7 @@ export default function VersionList({ project }: { project: string }) {
           },
         ],
       });
-      setList(data.prefixes ?? []);
+      setList(sortList(data.prefixes ?? []));
     }
 
     handle();
@@ -45,13 +57,15 @@ export function Item({ project }: { project: string }) {
       >
         {project}
       </Button>
-      <Modal
+      <Drawer
         visible={visible}
-        onCancel={() => setVisible(false)}
-        title="已备份版本"
+        closable={false}
+        onClose={() => setVisible(false)}
+        title=""
+        width={800}
       >
         <VersionList project={project} />
-      </Modal>
+      </Drawer>
     </>
   );
 }
