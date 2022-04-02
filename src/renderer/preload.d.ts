@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type OSS from 'ali-oss';
 import type { ConfigParams, HandleOssParams } from './type';
 
 declare global {
@@ -13,7 +12,7 @@ declare global {
         initOssClient: (ak: ConfigParams) => Promise<0>;
       };
     };
-    ossClient: OSS;
+    packageConfig: typeof import('../../release/app/package.json');
   }
 }
 

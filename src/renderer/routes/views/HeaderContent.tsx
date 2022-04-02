@@ -11,6 +11,7 @@ const Wrap = styled.div`
   height: 100%;
   display: flex;
   align-items: center;
+  color: #fff;
 `;
 
 export default function HeaderContent() {
@@ -37,6 +38,7 @@ export default function HeaderContent() {
   return (
     <>
       <Wrap>
+        v{window.packageConfig.version}
         <SettingTwoTone
           onClick={() => setVisile(true)}
           style={{

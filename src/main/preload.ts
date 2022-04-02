@@ -1,5 +1,8 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import type { ConfigParams } from '../renderer/type';
+import packageConfig from '../../release/app/package.json';
+
+contextBridge.exposeInMainWorld('packageConfig', packageConfig);
 
 contextBridge.exposeInMainWorld('electron', {
   ipcRenderer: {

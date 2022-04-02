@@ -9,7 +9,7 @@ import { resolveHtmlPath } from './util';
 import type { ConfigParams, HandleOssParams } from '../renderer/type';
 // oss有些方法只能在node端使用https://github.com/ali-sdk/ali-oss#browser-usage
 const client: { [name: string]: OSS } = {};
-
+// 自动更新 https://github.com/iffy/electron-updater-example
 export default class AppUpdater {
   constructor() {
     log.transports.file.level = 'info';
