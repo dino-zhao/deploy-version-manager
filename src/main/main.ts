@@ -1,15 +1,15 @@
 /* eslint global-require: off, no-console: off, promise/always-return: off */
 
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import { app, BrowserWindow, shell, ipcMain, session } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import OSS from 'ali-oss';
 import { resolveHtmlPath } from './util';
-import type { ConfigParams } from '../renderer/type';
+import type { ConfigParams, HandleOssParams } from '../renderer/type';
 // oss有些方法只能在node端使用https://github.com/ali-sdk/ali-oss#browser-usage
-let client: null | OSS = null;
-
+const client: { [name: string]: OSS } = {};
+// 自动更新 https://github.com/iffy/electron-updater-example
 export default class AppUpdater {
   constructor() {
     log.transports.file.level = 'info';
@@ -20,18 +20,23 @@ export default class AppUpdater {
 
 let mainWindow: BrowserWindow | null = null;
 
-ipcMain.handle('handleOss', async (event, method, ...args) => {
-  console.log(method, ...args);
-  return client?.[method](...args);
+ipcMain.handle('handleOss', async (event, params: HandleOssParams) => {
+  const { method, args, ownerBucket } = params;
+  console.log(...(args ?? []));
+  return client?.[ownerBucket ?? 'default']?.[method](...(args ?? []));
 });
 
 ipcMain.handle('initOssClient', async (event, ak: ConfigParams) => {
-  client = new OSS({
-    region: ak.region,
-    accessKeyId: ak.accessKeyId!,
-    accessKeySecret: ak.accessKeySecret!,
-    bucket: 'pi-version-backup',
+  const bucketList = ak.deployBucketLists.concat(ak.backupBucket);
+  bucketList.forEach((item) => {
+    client[item] = new OSS({
+      region: ak.region,
+      accessKeyId: ak.accessKeyId!,
+      accessKeySecret: ak.accessKeySecret!,
+      bucket: item,
+    });
   });
+  client.default = client[ak.backupBucket];
   return 0;
 });
 if (process.env.NODE_ENV === 'production') {
@@ -77,6 +82,7 @@ const createWindow = async () => {
     width: 1024,
     height: 728,
     icon: getAssetPath('icon.png'),
+    autoHideMenuBar: true,
     webPreferences: {
       preload: app.isPackaged
         ? path.join(__dirname, 'preload.js')
@@ -126,8 +132,14 @@ app.on('window-all-closed', () => {
 
 app
   .whenReady()
-  .then(() => {
+  .then(async () => {
     createWindow();
+    if (isDevelopment) {
+      // 安装扩展 https://www.electronjs.org/docs/latest/tutorial/devtools-extension
+      await session.defaultSession.loadExtension(
+        path.join(__dirname, '../extensions/redux-devtools/3.0.9_0')
+      );
+    }
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
