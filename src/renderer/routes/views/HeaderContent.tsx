@@ -23,6 +23,7 @@ export default function HeaderContent() {
     if (!localStorage.getItem('ak')) {
       setVisile(true);
     }
+    // 只要ak在本地了，表单就会保证都填全了
     if (config.accessKeyId) {
       initOssClient(config)
         .then((res) => {

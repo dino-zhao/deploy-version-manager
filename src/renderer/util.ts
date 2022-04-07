@@ -11,20 +11,6 @@ export function handleOss(params: HandleOssParams) {
   return window.electron.ipcRenderer.handleOss(params);
 }
 
-export async function listFiles({ bucket }: { bucket?: string }) {
-  return handleOss({
-    method: 'list',
-    ownerBucket: bucket,
-    args: [
-      {
-        // delimiter: '/',
-        'max-keys': 10,
-        prefix: 'pi-admin-web-dev/index.html',
-      },
-    ],
-  });
-}
-
 async function listFilesofPath({
   bucketName,
   path,
