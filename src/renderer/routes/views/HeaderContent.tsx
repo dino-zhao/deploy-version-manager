@@ -57,6 +57,7 @@ export default function HeaderContent() {
         visible={visibel}
         onCancel={() => setVisile(false)}
         footer={null}
+        width="80%"
       >
         <OssConfig hide={() => setVisile(false)} />
       </Modal>

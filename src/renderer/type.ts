@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 interface DeployBucket {
   name: string;
-  path?: string;
+  paths: string[];
 }
 
 export interface ConfigParams {

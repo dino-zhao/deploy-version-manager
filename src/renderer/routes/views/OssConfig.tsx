@@ -21,12 +21,15 @@ export default function OssConfig({ hide }: { hide: () => void }) {
   const config = useAppSelector(selectConfig);
   const dispatch = useAppDispatch();
   const onFinish = (values: ConfigParams) => {
+    values.deployBucketLists.forEach((item) => {
+      item.paths = item.paths ?? [];
+    });
     localStorage.setItem('ak', JSON.stringify(values));
     dispatch(mutateConfig(values));
     hide();
   };
   return (
-    <div style={{ display: 'flex', justifyContent: 'center' }}>
+    <div>
       <Form {...layout} initialValues={config} onFinish={onFinish}>
         <Item name="region" label="region" rules={[{ required: true }]}>
           <Input placeholder="请输入region" />
@@ -65,15 +68,17 @@ export default function OssConfig({ hide }: { hide: () => void }) {
                     <Form.Item
                       {...restField}
                       name={[name, 'name']}
-                      rules={[
-                        { required: true, message: 'Missing first name' },
-                      ]}
+                      rules={[{ required: true, message: 'bucket名不能为空' }]}
                     >
                       <Input placeholder="bucket名" />
                     </Form.Item>
-                    {/* <Form.Item {...restField} name={[name, 'path']}>
-                      <Input placeholder="保存路径" />
-                    </Form.Item> */}
+                    <Form.Item {...restField} name={[name, 'paths']}>
+                      <Select
+                        style={{ width: '200px' }}
+                        mode="tags"
+                        placeholder="保存路径"
+                      />
+                    </Form.Item>
                     <MinusCircleOutlined onClick={() => remove(name)} />
                   </Space>
                 ))}
