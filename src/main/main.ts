@@ -27,7 +27,9 @@ ipcMain.handle('handleOss', async (event, params: HandleOssParams) => {
 });
 
 ipcMain.handle('initOssClient', async (event, ak: ConfigParams) => {
-  const bucketList = ak.deployBucketLists.concat(ak.backupBucket);
+  const bucketList = ak.deployBucketLists
+    .map((item) => item.name)
+    .concat(ak.backupBucket);
   bucketList.forEach((item) => {
     client[item] = new OSS({
       region: ak.region,

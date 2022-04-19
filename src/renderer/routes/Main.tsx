@@ -39,7 +39,9 @@ export default function Main() {
           setList(
             data.prefixes
               .map((item: string) => item.slice(0, -1))
-              .filter((item: string) => config.deployBucketLists.includes(item))
+              .filter((item: string) =>
+                config.deployBucketLists.map((i) => i.name).includes(item)
+              )
           );
         } catch (error) {
           // 这里通常处理ak错误
