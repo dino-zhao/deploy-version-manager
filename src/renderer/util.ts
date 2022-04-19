@@ -132,19 +132,21 @@ export async function applySpecificVersion({
   return `应用版本${version}成功`;
 }
 export async function syncObject({
-  deployBucket,
+  from: { bucketName: fromBucket, path: fromPath = '' },
   backupBucket,
 }: {
-  deployBucket: string;
+  from: ObjectInfo;
   backupBucket: string;
 }) {
+  // 备份后的完整前缀
+  const fullPath = `${fromBucket}/${fromPath}`;
   // 1.先检查待备份文件的index文件的修改时间
   async function getIndexCreateTime() {
-    // 检查当前bucket的index.html文件的创建时间或者回退版本
+    // 检查from位置的index.html文件的创建时间或者回退版本
     const metaData = await handleOss({
       method: 'head',
-      args: ['index.html'],
-      ownerBucket: deployBucket,
+      args: [`${fromPath}index.html`],
+      ownerBucket: fromBucket,
     });
     // 由于复制时last-modified会修改，因此添加了字定义metadata
     const timeString =
@@ -153,32 +155,32 @@ export async function syncObject({
   }
   const createTime = await getIndexCreateTime();
   // 2.再检查备份文件夹内有没有对应备份
+  const curVersion = `${fullPath}${createTime}/`;
   async function checkIfisExist() {
-    const version = `${deployBucket}/${createTime}/`;
     try {
       await handleOss({
         method: 'head',
         ownerBucket: backupBucket,
-        args: [`${version}index.html`],
+        args: [`${curVersion}index.html`],
       });
-      return version;
+      return curVersion;
     } catch (error) {
       return '';
     }
   }
-  const curVersion = await checkIfisExist();
   // 3.如果有则退出
-  if (curVersion) {
+  if (await checkIfisExist()) {
     return `版本${curVersion}已同步`;
   }
   // 否则创建文件夹，复制
   await copyObject({
     from: {
-      bucketName: deployBucket,
+      bucketName: fromBucket,
+      path: fromPath,
     },
     to: {
       bucketName: backupBucket,
-      path: `${deployBucket}/${createTime}/`,
+      path: `${curVersion}`,
     },
     options: {
       meta: {

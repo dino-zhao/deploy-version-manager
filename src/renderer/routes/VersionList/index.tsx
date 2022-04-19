@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Button, Drawer } from 'antd';
+import { ProjectItem } from 'renderer/type';
 import ListDrawer from './ListDrawer';
 
-export default function Item({ project }: { project: string }) {
+export default function Item({ project }: { project: ProjectItem }) {
   const [visible, setVisible] = useState(false);
   return (
     <>
@@ -12,7 +13,7 @@ export default function Item({ project }: { project: string }) {
           setVisible(true);
         }}
       >
-        {project}
+        {project.name}/{project.path}
       </Button>
       <Drawer
         visible={visible}
@@ -22,7 +23,7 @@ export default function Item({ project }: { project: string }) {
         destroyOnClose
         width="80%"
       >
-        <ListDrawer project={project} />
+        <ListDrawer project={project.name} />
       </Drawer>
     </>
   );

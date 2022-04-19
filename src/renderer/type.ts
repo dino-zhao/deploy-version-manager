@@ -17,3 +17,8 @@ export interface HandleOssParams {
   ownerBucket?: string;
   args?: any[];
 }
+
+export interface ProjectItem {
+  name: string;
+  path?: string;
+}

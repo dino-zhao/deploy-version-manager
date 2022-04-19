@@ -5,6 +5,7 @@ import { useAppSelector, selectConfig } from 'renderer/store';
 import { handleOss, deleteObject, applySpecificVersion } from '../../util';
 
 export default function ListDrawer({ project }: { project: string }) {
+  console.log(project);
   const { backupBucket } = useAppSelector(selectConfig);
 
   const [listLoading, setListLoading] = useState(false);

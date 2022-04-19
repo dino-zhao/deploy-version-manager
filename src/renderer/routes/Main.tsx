@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { List, Layout, Button, message } from 'antd';
 import { Outlet } from 'react-router-dom';
 import { useAppSelector } from 'renderer/store';
+import { ProjectItem } from 'renderer/type';
 import { handleOss, syncObject } from '../util';
 import HeaderContent from './views/HeaderContent';
 import Item from './VersionList';
@@ -12,13 +13,13 @@ interface LoadingParams {
 }
 
 export default function Main() {
-  const [projectList, setList] = useState<string[]>([]);
+  const [projectList, setList] = useState<ProjectItem[]>([]);
   const { isInit, config } = useAppSelector((state) => state.ossConfig);
   const [loadingState, setLoading] = useState<LoadingParams>({});
   useEffect(() => {
     const obj: LoadingParams = {};
     projectList.forEach((item) => {
-      obj[item] = false;
+      obj[item.name] = false;
     });
     setLoading(obj);
   }, [projectList]);
@@ -46,9 +47,14 @@ export default function Main() {
                 (i) => i.name === item
               )!;
               if (cur?.paths.length > 0) {
-                return cur?.paths.map((path) => `${item}/${path}`);
+                return cur?.paths.map((path) => {
+                  return {
+                    name: item,
+                    path,
+                  };
+                });
               }
-              return item;
+              return { name: item };
             });
           setList(arr.flat());
         } catch (error) {
@@ -81,17 +87,20 @@ export default function Main() {
             <List.Item>
               <Item project={item} />
               <Button
-                loading={loadingState[item]}
+                loading={loadingState[item.name]}
                 type="primary"
                 onClick={async () => {
-                  setLoading((state) => ({ ...state, [item]: true }));
+                  setLoading((state) => ({ ...state, [item.name]: true }));
                   message.info(
                     await syncObject({
-                      deployBucket: item,
+                      from: {
+                        bucketName: item.name,
+                        path: item.path,
+                      },
                       backupBucket: 'pi-version-backup',
                     })
                   );
-                  setLoading((state) => ({ ...state, [item]: false }));
+                  setLoading((state) => ({ ...state, [item.name]: false }));
                 }}
               >
                 同步最新备份
