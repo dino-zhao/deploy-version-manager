@@ -36,13 +36,21 @@ export default function Main() {
               },
             ],
           });
-          setList(
-            data.prefixes
-              .map((item: string) => item.slice(0, -1))
-              .filter((item: string) =>
-                config.deployBucketLists.map((i) => i.name).includes(item)
-              )
-          );
+          const arr = data.prefixes
+            .map((item: string) => item.slice(0, -1))
+            .filter((item: string) =>
+              config.deployBucketLists.map((i) => i.name).includes(item)
+            )
+            .map((item: string) => {
+              const cur = config.deployBucketLists.find(
+                (i) => i.name === item
+              )!;
+              if (cur?.paths.length > 0) {
+                return cur?.paths.map((path) => `${item}/${path}`);
+              }
+              return item;
+            });
+          setList(arr.flat());
         } catch (error) {
           // 这里通常处理ak错误
           if (typeof error === 'object') {
