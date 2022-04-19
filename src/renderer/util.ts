@@ -39,6 +39,98 @@ async function listFilesofPath({
   return fileList;
 }
 
+interface ObjectInfo {
+  bucketName: string;
+  // 这个路径带最后斜线
+  path?: string;
+}
+
+// 删除文件
+export async function deleteObject({ path, bucketName }: ObjectInfo) {
+  // 1.列举要删除的文件
+  const fileList = await listFilesofPath({
+    path,
+    bucketName,
+  });
+  if (fileList.length === 0) {
+    return '当前待删除文件为空';
+  }
+  // 2.依次删除
+  return handleOss({
+    ownerBucket: bucketName,
+    method: 'deleteMulti',
+    args: [fileList, { quiet: true }],
+  });
+}
+
+async function copyObject({
+  from: { bucketName: fromBucket, path: fromPath },
+  to: { bucketName: toBucket, path: toPath = '' },
+  options,
+}: {
+  from: ObjectInfo;
+  to: ObjectInfo;
+  options?: { [key: string]: any };
+}) {
+  // 第一步获取待复制列表
+  const fileList = await listFilesofPath({
+    path: fromPath,
+    bucketName: fromBucket,
+  });
+  // 第二步开始复制
+  return new Promise((resolve, reject) => {
+    const observables = fileList.map((item) =>
+      defer(() => {
+        console.log(`copy from ${fromBucket}/${item} to ${toBucket}/${toPath}`);
+        return handleOss({
+          method: 'copy',
+          ownerBucket: toBucket,
+          args: [
+            // 如果包含from的路径，则将该路径替换为to的路径，否则直接把to的路径添加到文件前
+            fromPath ? item.replace(fromPath, toPath) : `${toPath}${item}`,
+            item,
+            fromBucket,
+            options,
+          ],
+        });
+      })
+    );
+    from(observables)
+      .pipe(mergeAll(50))
+      .subscribe({
+        error: () => {
+          reject(new Error('复制错误'));
+        },
+        complete: () => {
+          resolve('success');
+        },
+      });
+  });
+}
+export async function applySpecificVersion({
+  version,
+  backupBucket,
+}: {
+  version: string;
+  backupBucket: string;
+}) {
+  // 1.删除对应bucket
+  const targetBucket = version.slice(0, -21);
+  await deleteObject({
+    bucketName: targetBucket,
+  });
+  // 从备份bucket复制到部署bucket
+  await copyObject({
+    from: {
+      bucketName: backupBucket,
+      path: version,
+    },
+    to: {
+      bucketName: targetBucket,
+    },
+  });
+  return `应用版本${version}成功`;
+}
 export async function syncObject({
   deployBucket,
   backupBucket,
@@ -75,115 +167,24 @@ export async function syncObject({
     }
   }
   const curVersion = await checkIfisExist();
-  // 3.如果有则退出，否则创建文件夹，复制
+  // 3.如果有则退出
   if (curVersion) {
     return `版本${curVersion}已同步`;
   }
-  async function copyBetweenBuckets() {
-    const fileList = await listFilesofPath({
+  // 否则创建文件夹，复制
+  await copyObject({
+    from: {
       bucketName: deployBucket,
-    });
-    return new Promise((resolve, reject) => {
-      const observables = fileList.map((item) =>
-        defer(() => {
-          console.log(
-            `copy from ${deployBucket}/${item} to ${deployBucket}/${createTime}/${item}`
-          );
-          return handleOss({
-            method: 'copy',
-            args: [
-              `${deployBucket}/${createTime}/${item}`,
-              item,
-              deployBucket,
-              // 没有声明的header和meta会默认带过去
-              {
-                meta: {
-                  'apply-time': createTime,
-                },
-              },
-            ],
-          });
-        })
-      );
-      from(observables)
-        .pipe(mergeAll(30))
-        .subscribe({
-          error: () => {
-            reject(new Error('复制错误'));
-          },
-          complete: () => {
-            resolve('success');
-          },
-        });
-    });
-  }
-  await copyBetweenBuckets();
+    },
+    to: {
+      bucketName: backupBucket,
+      path: `${deployBucket}/${createTime}/`,
+    },
+    options: {
+      meta: {
+        'apply-time': createTime,
+      },
+    },
+  });
   return '同步成功';
-}
-
-export async function deleteObject({
-  path,
-  bucketName,
-}: {
-  bucketName?: string;
-  path?: string;
-}) {
-  // 1.列举要删除的文件
-  const fileList = await listFilesofPath({
-    path,
-    bucketName,
-  });
-  if (fileList.length === 0) {
-    return '当前待删除文件为空';
-  }
-  // 2.依次删除
-  return handleOss({
-    ownerBucket: bucketName,
-    method: 'deleteMulti',
-    args: [fileList, { quiet: true }],
-  });
-}
-
-export async function applySpecificVersion({
-  version,
-  backupBucket,
-}: {
-  version: string;
-  backupBucket: string;
-}) {
-  // 1.删除对应bucket
-  const targetBucket = version.slice(0, -21);
-  await deleteObject({
-    bucketName: targetBucket,
-  });
-  // 2.将该版本复制过去
-  async function copyBetweenBuckets() {
-    const fileList = await listFilesofPath({
-      path: version,
-    });
-    return new Promise((resolve, reject) => {
-      const observables = fileList.map((item) =>
-        defer(() => {
-          console.log(`copy from ${backupBucket}/${item} to ${targetBucket}`);
-          return handleOss({
-            method: 'copy',
-            ownerBucket: targetBucket,
-            args: [item.replace(version, ''), item, backupBucket],
-          });
-        })
-      );
-      from(observables)
-        .pipe(mergeAll(50))
-        .subscribe({
-          error: () => {
-            reject(new Error('复制错误'));
-          },
-          complete: () => {
-            resolve('success');
-          },
-        });
-    });
-  }
-  await copyBetweenBuckets();
-  return `应用版本${version}成功`;
 }
