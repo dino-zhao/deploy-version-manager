@@ -54,10 +54,11 @@ export default function Main() {
                   return {
                     name: item,
                     path,
+                    targetBucket: cur.targetBucket,
                   };
                 });
               }
-              return { name: item };
+              return { name: item, targetBucket: cur.targetBucket };
             });
           setList(arr.flat());
         } catch (error) {

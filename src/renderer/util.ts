@@ -108,6 +108,19 @@ async function copyObject({
       });
   });
 }
+// 包括先删除目标目录已有文件，再将当前文件复制过去
+export async function fullCopy(params: { from: ObjectInfo; to: ObjectInfo }) {
+  const {
+    to: { bucketName: toBucket, path: toPath = '' },
+  } = params;
+  // 删除当前文件
+  await deleteObject({
+    bucketName: toBucket,
+    path: toPath,
+  });
+  await copyObject(params);
+}
+
 export async function applySpecificVersion({
   version,
   backupBucket,
@@ -119,13 +132,7 @@ export async function applySpecificVersion({
   const versionParams = version.slice(0, -1).split('/');
   const targetBucket = versionParams[0];
   const path = versionParams.length > 2 ? `${versionParams[1]}/` : undefined;
-  // 1.删除对应bucket
-  await deleteObject({
-    bucketName: targetBucket,
-    path,
-  });
-  // 从备份bucket复制到部署bucket
-  await copyObject({
+  await fullCopy({
     from: {
       bucketName: backupBucket,
       path: version,
@@ -137,6 +144,7 @@ export async function applySpecificVersion({
   });
   return `应用版本${version}成功`;
 }
+
 export async function syncObject({
   from: { bucketName: fromBucket, path: fromPath = '' },
   backupBucket,

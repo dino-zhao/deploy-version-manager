@@ -2,6 +2,7 @@
 interface DeployBucket {
   name: string;
   paths: string[];
+  targetBucket?: string;
 }
 
 export interface ConfigParams {
@@ -10,7 +11,6 @@ export interface ConfigParams {
   accessKeySecret: string;
   backupBucket: string;
   deployBucketLists: DeployBucket[];
-  targetBucket?: string;
 }
 
 export interface HandleOssParams {
@@ -22,4 +22,5 @@ export interface HandleOssParams {
 export interface ProjectItem {
   name: string;
   path?: string;
+  targetBucket?: string;
 }
