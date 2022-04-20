@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Button, Drawer, Tag, Space, Popconfirm } from 'antd';
+import { Button, Drawer, Tag, Space, Popconfirm, message } from 'antd';
 import { ProjectItem } from 'renderer/type';
+import { fullCopy } from 'renderer/util';
 import ListDrawer from './ListDrawer';
 
 export default function Item({ project }: { project: ProjectItem }) {
@@ -24,9 +25,23 @@ export default function Item({ project }: { project: ProjectItem }) {
         </Button>
         {project.targetBucket && (
           <Popconfirm
-            title="一旦执行会影响目标bucket对应的应用"
-            onConfirm={() => {
-              console.log('ooo');
+            title={`一旦执行会影响${project.targetBucket}对应的应用`}
+            onConfirm={async () => {
+              try {
+                await fullCopy({
+                  from: {
+                    bucketName: project.name,
+                    path: project.path,
+                  },
+                  to: {
+                    bucketName: project.targetBucket!,
+                    path: project.path,
+                  },
+                });
+                message.success('操作成功');
+              } catch (error) {
+                message.error('操作失败');
+              }
             }}
           >
             <Button danger>复制到{project.targetBucket}</Button>
