@@ -28,7 +28,7 @@ export default function Item({ project }: { project: ProjectItem }) {
         destroyOnClose
         width="80%"
       >
-        <ListDrawer project={project.name} />
+        <ListDrawer project={project} />
       </Drawer>
     </>
   );
