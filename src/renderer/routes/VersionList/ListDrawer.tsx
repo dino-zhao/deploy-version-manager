@@ -6,6 +6,7 @@ import { ProjectItem } from 'renderer/type';
 import { handleOss, deleteObject, applySpecificVersion } from '../../util';
 
 export default function ListDrawer({ project }: { project: ProjectItem }) {
+  console.log(project);
   const prefix = useMemo(() => {
     return `${project.name}/${project.path ?? ''}`;
   }, [project]);

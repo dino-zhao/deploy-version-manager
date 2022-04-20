@@ -114,10 +114,14 @@ export async function applySpecificVersion({
   version: string;
   backupBucket: string;
 }) {
+  // 解析参数，获取bucketname和path
+  const versionParams = version.slice(0, -1).split('/');
+  const targetBucket = versionParams[0];
+  const path = versionParams.length > 2 ? `${versionParams[1]}/` : undefined;
   // 1.删除对应bucket
-  const targetBucket = version.slice(0, -21);
   await deleteObject({
     bucketName: targetBucket,
+    path,
   });
   // 从备份bucket复制到部署bucket
   await copyObject({
@@ -127,6 +131,7 @@ export async function applySpecificVersion({
     },
     to: {
       bucketName: targetBucket,
+      path,
     },
   });
   return `应用版本${version}成功`;
