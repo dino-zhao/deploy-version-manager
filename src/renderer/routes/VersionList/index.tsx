@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, Drawer } from 'antd';
+import { Button, Drawer, Tag } from 'antd';
 import { ProjectItem } from 'renderer/type';
 import ListDrawer from './ListDrawer';
 
@@ -13,7 +13,12 @@ export default function Item({ project }: { project: ProjectItem }) {
           setVisible(true);
         }}
       >
-        {project.name}/{project.path}
+        {project.name}{' '}
+        {project.path ? (
+          <Tag color="cyan" style={{ marginLeft: '10px' }}>
+            {project.path}
+          </Tag>
+        ) : null}
       </Button>
       <Drawer
         visible={visible}

@@ -12,6 +12,9 @@ interface LoadingParams {
   [str: string]: boolean;
 }
 
+function generatorKey(item: ProjectItem) {
+  return item.name + (item.path ?? '');
+}
 export default function Main() {
   const [projectList, setList] = useState<ProjectItem[]>([]);
   const { isInit, config } = useAppSelector((state) => state.ossConfig);
@@ -19,7 +22,7 @@ export default function Main() {
   useEffect(() => {
     const obj: LoadingParams = {};
     projectList.forEach((item) => {
-      obj[item.name] = false;
+      obj[generatorKey(item)] = false;
     });
     setLoading(obj);
   }, [projectList]);
@@ -87,10 +90,13 @@ export default function Main() {
             <List.Item>
               <Item project={item} />
               <Button
-                loading={loadingState[item.name]}
+                loading={loadingState[generatorKey(item)]}
                 type="primary"
                 onClick={async () => {
-                  setLoading((state) => ({ ...state, [item.name]: true }));
+                  setLoading((state) => ({
+                    ...state,
+                    [generatorKey(item)]: true,
+                  }));
                   message.info(
                     await syncObject({
                       from: {
@@ -100,7 +106,10 @@ export default function Main() {
                       backupBucket: 'pi-version-backup',
                     })
                   );
-                  setLoading((state) => ({ ...state, [item.name]: false }));
+                  setLoading((state) => ({
+                    ...state,
+                    [generatorKey(item)]: false,
+                  }));
                 }}
               >
                 同步最新备份

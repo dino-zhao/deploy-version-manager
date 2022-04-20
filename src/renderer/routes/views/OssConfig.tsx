@@ -22,7 +22,14 @@ export default function OssConfig({ hide }: { hide: () => void }) {
   const dispatch = useAppDispatch();
   const onFinish = (values: ConfigParams) => {
     values.deployBucketLists.forEach((item) => {
-      item.paths = item.paths ?? [];
+      item.paths = item.paths
+        ? item.paths.map((i) => {
+            if (i.endsWith('/')) {
+              return i;
+            }
+            return `${i}/`;
+          })
+        : [];
     });
     localStorage.setItem('ak', JSON.stringify(values));
     dispatch(mutateConfig(values));
