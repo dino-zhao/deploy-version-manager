@@ -52,6 +52,7 @@ export async function deleteObject({ path, bucketName }: ObjectInfo) {
     path,
     bucketName,
   });
+  console.log(bucketName, path);
   if (fileList.length === 0) {
     return '当前待删除文件为空';
   }

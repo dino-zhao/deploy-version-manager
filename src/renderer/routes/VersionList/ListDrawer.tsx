@@ -6,7 +6,6 @@ import { ProjectItem } from 'renderer/type';
 import { handleOss, deleteObject, applySpecificVersion } from '../../util';
 
 export default function ListDrawer({ project }: { project: ProjectItem }) {
-  console.log(project);
   const prefix = useMemo(() => {
     return `${project.name}/${project.path ?? ''}`;
   }, [project]);
@@ -88,7 +87,11 @@ export default function ListDrawer({ project }: { project: ProjectItem }) {
                 title="确定删除当前版本吗?"
                 onConfirm={async () => {
                   try {
-                    await deleteObject({ path: item });
+                    console.log(item);
+                    await deleteObject({
+                      bucketName: backupBucket,
+                      path: item,
+                    });
                     message.success('删除成功');
                     await getVersionList();
                   } catch (error) {
