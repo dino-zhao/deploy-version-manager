@@ -13,7 +13,7 @@ export default function Item({ project }: { project: ProjectItem }) {
           setVisible(true);
         }}
       >
-        {project.name}{' '}
+        {project.name}
         {project.path ? (
           <Tag color="cyan" style={{ marginLeft: '10px' }}>
             {project.path}

@@ -10,11 +10,11 @@ import type { ConfigParams } from '../../type';
 
 const { Item } = Form;
 const layout = {
-  labelCol: { span: 8 },
-  wrapperCol: { span: 16 },
+  labelCol: { span: 4 },
+  wrapperCol: { span: 20 },
 };
 const tailLayout = {
-  wrapperCol: { offset: 8, span: 16 },
+  wrapperCol: { offset: 4, span: 16 },
 };
 
 export default function OssConfig({ hide }: { hide: () => void }) {
@@ -64,43 +64,53 @@ export default function OssConfig({ hide }: { hide: () => void }) {
         </Item>
         <Item label="待备份bucket">
           <Form.List name="deployBucketLists">
-            {(fields, { add, remove }) => (
-              <>
-                {fields.map(({ key, name, ...restField }) => (
-                  <Space
-                    key={key}
-                    style={{ display: 'flex', marginBottom: 8 }}
-                    align="baseline"
-                  >
-                    <Form.Item
-                      {...restField}
-                      name={[name, 'name']}
-                      rules={[{ required: true, message: 'bucket名不能为空' }]}
+            {(fields, { add, remove }) => {
+              return (
+                <>
+                  {fields.map(({ key, name, ...restField }) => (
+                    <Space
+                      key={key}
+                      style={{ display: 'flex', marginBottom: 8 }}
+                      align="baseline"
                     >
-                      <Input placeholder="bucket名" />
-                    </Form.Item>
-                    <Form.Item {...restField} name={[name, 'paths']}>
-                      <Select
-                        style={{ width: '200px' }}
-                        mode="tags"
-                        placeholder="保存路径"
-                      />
-                    </Form.Item>
-                    <MinusCircleOutlined onClick={() => remove(name)} />
-                  </Space>
-                ))}
-                <Form.Item>
-                  <Button
-                    type="dashed"
-                    onClick={() => add()}
-                    block
-                    icon={<PlusOutlined />}
-                  >
-                    Add field
-                  </Button>
-                </Form.Item>
-              </>
-            )}
+                      <Form.Item
+                        {...restField}
+                        name={[name, 'name']}
+                        rules={[
+                          { required: true, message: 'bucket名不能为空' },
+                        ]}
+                      >
+                        <Input placeholder="bucket名" />
+                      </Form.Item>
+                      <Form.Item {...restField} name={[name, 'paths']}>
+                        <Select
+                          style={{ width: '200px' }}
+                          mode="tags"
+                          placeholder="保存路径"
+                        />
+                      </Form.Item>
+                      <Form.Item {...restField} name={[name, 'targetBucket']}>
+                        <Input
+                          style={{ width: '200px' }}
+                          placeholder="被覆盖的bucket"
+                        />
+                      </Form.Item>
+                      <MinusCircleOutlined onClick={() => remove(name)} />
+                    </Space>
+                  ))}
+                  <Form.Item>
+                    <Button
+                      type="dashed"
+                      onClick={() => add()}
+                      block
+                      icon={<PlusOutlined />}
+                    >
+                      Add field
+                    </Button>
+                  </Form.Item>
+                </>
+              );
+            }}
           </Form.List>
         </Item>
         <Item {...tailLayout}>

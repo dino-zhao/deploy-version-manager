@@ -10,6 +10,7 @@ export interface ConfigParams {
   accessKeySecret: string;
   backupBucket: string;
   deployBucketLists: DeployBucket[];
+  targetBucket?: string;
 }
 
 export interface HandleOssParams {
