@@ -10,8 +10,8 @@ const ak = JSON.parse(localStorage.getItem('ak') ?? '{}');
 const initialState: ConfigState = {
   config: {
     deployBucketLists: ak.deployBucketLists ?? [
-      'pi-admin-pre',
-      'pi-admin-web-dev',
+      { name: 'pi-admin-pre', paths: [] },
+      { name: 'pi-admin-web-dev', paths: [] },
     ],
     region: 'oss-cn-hangzhou',
     accessKeyId: ak.accessKeyId ?? '',

@@ -1,18 +1,22 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { List, Button, message, Popconfirm, Space } from 'antd';
 import moment from 'moment';
 import { useAppSelector, selectConfig } from 'renderer/store';
+import { ProjectItem } from 'renderer/type';
 import { handleOss, deleteObject, applySpecificVersion } from '../../util';
 
-export default function ListDrawer({ project }: { project: string }) {
+export default function ListDrawer({ project }: { project: ProjectItem }) {
+  const prefix = useMemo(() => {
+    return `${project.name}/${project.path ?? ''}`;
+  }, [project]);
   const { backupBucket } = useAppSelector(selectConfig);
 
   const [listLoading, setListLoading] = useState(false);
   const getTimeString = useCallback(
     (str: string) => {
-      return str.replace(/\//g, '').replace(project, '');
+      return str.replace(prefix, '').slice(0, -1);
     },
-    [project]
+    [prefix]
   );
   const [list, setList] = useState<string[]>([]);
   const sortList = useCallback(
@@ -36,7 +40,7 @@ export default function ListDrawer({ project }: { project: string }) {
       method: 'list',
       args: [
         {
-          prefix: `${project}/`,
+          prefix,
           delimiter: '/',
           'max-keys': 1000,
         },
@@ -44,7 +48,7 @@ export default function ListDrawer({ project }: { project: string }) {
     });
     setListLoading(false);
     setList(sortList(data.prefixes ?? []));
-  }, [project, sortList]);
+  }, [prefix, sortList]);
 
   useEffect(() => {
     getVersionList();
@@ -83,7 +87,11 @@ export default function ListDrawer({ project }: { project: string }) {
                 title="确定删除当前版本吗?"
                 onConfirm={async () => {
                   try {
-                    await deleteObject({ path: item });
+                    console.log(item);
+                    await deleteObject({
+                      bucketName: backupBucket,
+                      path: item,
+                    });
                     message.success('删除成功');
                     await getVersionList();
                   } catch (error) {

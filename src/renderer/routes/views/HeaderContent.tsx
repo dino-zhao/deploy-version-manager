@@ -25,12 +25,14 @@ export default function HeaderContent() {
     }
     // 只要ak在本地了，表单就会保证都填全了
     if (config.accessKeyId) {
+      console.log(config);
       initOssClient(config)
         .then((res) => {
           dispatch(initOss());
           return res;
         })
-        .catch(() => {
+        .catch((e) => {
+          console.error(e.message);
           message.error('初始化失败');
         });
     }
@@ -55,6 +57,7 @@ export default function HeaderContent() {
         visible={visibel}
         onCancel={() => setVisile(false)}
         footer={null}
+        width="80%"
       >
         <OssConfig hide={() => setVisile(false)} />
       </Modal>
